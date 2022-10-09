@@ -5,8 +5,8 @@ I took a few liberties with this project including: a scanner that returns a lis
 tokens instead of one token at a time, the user can input a file name, and the program
 will say "yes" or "no" if the file can be parsed. 
 
-I decided to do all the programming from scrath so the code is hard to follow and definetly 
-not the most efficient. 
+I decided to do all the programming from scratch so the code is a bit hard to follow and 
+definetly not the most efficient. 
 
 Resources: 
 
