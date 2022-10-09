@@ -9,6 +9,7 @@ I decided to do all the programming from scrath so the code is hard to follow an
 not the most efficient. 
 
 Resources: 
+
 https://beautifulracket.com/explainer/errors-and-exceptions.html
 For an outline of how to raise and catch custom exceptions
 
