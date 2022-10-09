@@ -1,0 +1,139 @@
+#lang racket
+
+;https://lists.racket-lang.org/users/archive/2014-September/064203.html
+(define (repeat f count) 
+  (for ((i (in-range count))) (f)))
+;(repeat (lambda () (displayln "hello world")) 10)
+
+
+
+
+(define (match expected token list)
+  (printf "matching ~a to ~a \n" token expected)
+  (if (eqv? expected token)
+      ;(begin (remove-token list) #t)
+      (remove-token list)
+      "error"))
+
+(define (match2 expected list)
+  (let ([token (first list)])
+  (printf "matching ~a to ~a \n" token expected)
+  (if (eqv? expected token)
+      ;(begin (remove-token list) #t)
+      (remove-token list)
+      (raise "parse error"))))
+
+
+(define (remove-token list) ;don't need token now 
+  (rest list))
+  ;(string-trim list token #:right? #f))
+
+
+(define (parse-start list)
+  (let ([token (first list)])
+  (if (member token '("id" "read" "write" "$$"))
+         (begin
+           (let ([new_list (stmt-list list)])
+             (let ([new_token (first new_list)])
+           (match2 "$$" new_list)
+               "SUCCESS"))) ; -- maybe swap - put token at end then we can get it after calling other stuff 
+         "error"))
+  )
+
+(define (stmt-list list)
+  (let ([token (first list)])
+  (writeln "stmt list")
+  (cond [(member token '("id" "read" "write"))
+         (stmt-list (stmt list))]
+        [(eqv? "$$" token)
+         list]
+        [else "error"])))
+
+
+(define (stmt list)
+  (let ([token (first list)])
+  (writeln "stmt")
+  (cond [(eqv? "id" token)
+         (expr (match2 ":=" (match2 "id" list)))]
+        [(eqv? "read" token)
+         (match2 "id" (match2 "read" list))]
+        [(eqv? "write" token)
+         (expr (match2 "write" list))]
+        [else
+         "error"])))
+
+(define (expr list)
+  (writeln "expr")
+  (let ([token (first list)])
+  (if (member token '("id" "number" "("))
+      (begin (term-tail (term list)))
+      (raise "parse error"))))
+
+(define (term-tail list)
+  (writeln "term tail")
+  (writeln list)
+  (let ([token (first list)])
+  (cond [(member token '("+" "-"))
+         (term-tail (term (add-op list)))]
+        [(member token '(")" "id" "read" "write" "$$"))
+         list]
+        [else
+         "error"])))
+
+(define (term list)
+  (writeln "term")
+  (let ([token (first list)])
+  (if (member token '("id" "number" "("))
+      (begin (factor-tail (factor list)))
+      "error")))
+
+(define (factor-tail list)
+  (writeln "factor tail")
+  (writeln list)
+  (let ([token (first list)])
+  (cond [(member token '("*" "/"))
+         (factor-tail (factor (mult-op list)))]
+        [(member token '("+" "-" ")" "id" "read" "write" "$$"))
+         list]
+        [else
+         "error"])))
+
+(define (factor list)
+  (writeln "factor")
+  (let ([token (first list)])
+  (cond [(eqv? "id" token)
+         (match2 "id" list)] 
+        [(eqv? "number" token)
+         (match2 "number" list)]
+        [(eqv? "(" token)
+         (match2 ")" (expr (match2 "(" list)))]
+        [else
+         "error"])))
+
+;not using these yet
+(define (add-op list)
+  (writeln "add op")
+  (let ([token (first list)])
+  (cond [(eqv? "+" token)
+         (match2 "+" list)]
+        [(eqv? "-" token)
+         (match2 "-" list)]
+        [else
+         "error"])))
+
+(define (mult-op list)
+  (writeln "mult op")
+  (let ([token (first list)])
+  (cond [(eqv? "*" token)
+         (match2 "*" list)]
+        [(eqv? "/" token)
+         (match2 "/" list)]
+        [else
+         "error"])))
+
+(writeln (parse-start '( "read" "id" "write" "id" "id" ":=" "(" "number" "+" "number" ")" "$$")))
+
+;scanner :(
+                
+                  
+        
